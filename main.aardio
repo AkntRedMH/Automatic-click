@@ -1,0 +1,41 @@
+import fonts.fontAwesome;
+import win.ui;
+/*DSG{{*/
+mainForm = win.form(text="自动点击";right=319;bottom=239;border="dialog frame";max=false)
+mainForm.add(
+is_run_display={cls="static";text='\uF011';left=304;top=0;right=320;bottom=16;bgcolor=255;font=LOGFONT(h=-18;name='FontAwesome');z=2};
+is_run_text={cls="static";text="未运行";left=248;top=0;right=304;bottom=16;align="right";transparent=1;z=1};
+tab={cls="tab";left=0;top=0;right=320;bottom=240;edge=1;z=3}
+)
+/*}}*/
+
+import console;
+import key;
+
+hkId = 0; //快捷键注册ID，全局变量，会在其他页面用到
+
+var Sc =  mainForm.tab.loadForm("\dlg\Simple_click.aardio");
+mainForm.tab.setItemText(1, "简单单击");
+
+//mainForm.tab.loadForm("\dlg\Record.aardio");
+//mainForm.tab.setItemText(2, "未完成");
+
+mainForm.tab.loadForm("\dlg\Settings.aardio");
+mainForm.tab.setItemText(2, "设置");
+
+//翻页时重新注册快捷键
+mainForm.tab.onnotify = function(id,code,ptr){
+	if(code==0xFFFFFDD9/*_TCN_SELCHANGE*/){
+		mainForm.unreghotkey(hkId);
+		click_flag = false;
+		
+		if(mainForm.tab.selIndex == 1){
+			hkId = mainForm.reghotkey(function(id,mod,vk){
+				Sc.simple_click();
+			}, 0, key.getCode(Sc.shortcut_key.text));
+		}
+	}
+}
+
+mainForm.show();
+return win.loopMessage();

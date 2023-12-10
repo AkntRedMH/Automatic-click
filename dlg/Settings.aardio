@@ -1,0 +1,45 @@
+import win.ui;
+/*DSG{{*/
+var winform = win.form(text="aardio form";right=319;bottom=219)
+winform.add(
+debug_mode={cls="checkbox";left=136;top=80;right=160;bottom=104;disabled=1;font=LOGFONT(h=-16);z=3};
+minimization={cls="checkbox";left=136;top=48;right=160;bottom=72;font=LOGFONT(h=-16);z=5};
+static={cls="static";text="窗口置顶：";left=24;top=16;right=112;bottom=40;font=LOGFONT(h=-16);notify=1;transparent=1;z=2};
+static2={cls="static";text="调试模式：";left=24;top=80;right=112;bottom=104;font=LOGFONT(h=-16);notify=1;transparent=1;z=4};
+static3={cls="static";text="运行后最小化：";left=24;top=48;right=144;bottom=72;font=LOGFONT(h=-16);notify=1;transparent=1;z=6};
+window_topping={cls="checkbox";left=136;top=16;right=160;bottom=40;font=LOGFONT(h=-16);z=1}
+)
+/*}}*/
+
+import winex;
+import win;
+import fsys.config;
+
+//读取配置文件
+var cfg = fsys.config();
+winform.window_topping.checked = cfg.config.S_window_topping;
+winform.debug_mode.checked = cfg.config.S_debug_mode;
+winform.minimization.checked = cfg.config.S_minimization;
+
+var hwnd = mainForm.hwnd;
+if(winform.window_topping.checked) win.setTopmost(hwnd);
+else win.setTopmost(hwnd, false);
+win.setFocus(hwnd);
+
+winform.window_topping.oncommand = function(id,event){
+	if(winform.window_topping.checked) win.setTopmost(hwnd);
+	else win.setTopmost(hwnd, false);
+	
+	cfg.config.S_window_topping = winform.window_topping.checked;
+}
+
+winform.debug_mode.oncommand = function(id,event){
+	cfg.config.S_debug_mode = winform.debug_mode.checked;
+}
+
+winform.minimization.oncommand = function(id,event){
+	cfg.config.S_minimization = winform.minimization.checked;
+}
+
+winform.show();
+win.loopMessage();

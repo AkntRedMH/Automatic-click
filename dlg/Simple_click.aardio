@@ -1,0 +1,256 @@
+import win.ui;
+import win.ui.atom;
+/*DSG{{*/
+var winform = win.form(text="aardio form";right=319;bottom=219)
+winform.add(
+click_interval={cls="edit";text="1000";left=88;top=96;right=160;bottom=120;edge=1;font=LOGFONT(h=-16);z=2};
+click_mode={cls="combobox";left=88;top=56;right=160;bottom=80;edge=1;font=LOGFONT(h=-16);items={};mode="dropdownlist";z=6};
+mouse_button={cls="combobox";left=88;top=16;right=160;bottom=40;edge=1;font=LOGFONT(h=-16);items={};mode="dropdownlist";z=1};
+mouse_current_position_x={cls="edit";left=232;top=48;right=304;bottom=72;edge=1;font=LOGFONT(h=-16);readonly=1;z=8};
+mouse_current_position_y={cls="edit";left=232;top=80;right=304;bottom=104;edge=1;font=LOGFONT(h=-16);readonly=1;z=9};
+random_interval={cls="edit";text="0";left=88;top=176;right=160;bottom=200;edge=1;font=LOGFONT(h=-16);z=3};
+random_region={cls="checkbox";left=288;top=112;right=312;bottom=136;font=LOGFONT(h=-16);z=15};
+random_x1={cls="edit";left=200;top=144;right=248;bottom=168;edge=1;font=LOGFONT(h=-16);readonly=1;z=10};
+random_x2={cls="edit";left=200;top=176;right=248;bottom=200;edge=1;font=LOGFONT(h=-16);readonly=1;z=12};
+random_y1={cls="edit";left=256;top=144;right=304;bottom=168;edge=1;font=LOGFONT(h=-16);readonly=1;z=11};
+random_y2={cls="edit";left=256;top=176;right=304;bottom=200;edge=1;font=LOGFONT(h=-16);readonly=1;z=13};
+shortcut_key={cls="combobox";left=88;top=136;right=160;bottom=160;edge=1;font=LOGFONT(h=-16);items={};mode="dropdownlist";z=7};
+splitter={cls="splitter";left=184;top=-40;right=192;bottom=220;disabled=1;frame=1;z=14};
+static={cls="static";text="鼠标按键：";left=8;top=16;right=96;bottom=40;font=LOGFONT(h=-16);notify=1;transparent=1;z=16};
+static10={cls="static";text="ms";left=160;top=96;right=184;bottom=120;font=LOGFONT(h=-16);notify=1;transparent=1;z=5};
+static11={cls="static";text="点击方式：";left=8;top=56;right=96;bottom=80;font=LOGFONT(h=-16);notify=1;transparent=1;z=17};
+static2={cls="static";text="点击间隔：";left=8;top=96;right=96;bottom=120;font=LOGFONT(h=-16);notify=1;transparent=1;z=18};
+static3={cls="static";text="快捷键：";left=8;top=136;right=96;bottom=160;font=LOGFONT(h=-16);notify=1;transparent=1;z=20};
+static4={cls="static";text="鼠标实时位置：";left=200;top=16;right=320;bottom=40;font=LOGFONT(h=-16);notify=1;transparent=1;z=24};
+static5={cls="static";text="X：";left=200;top=48;right=232;bottom=72;font=LOGFONT(h=-16);notify=1;transparent=1;z=23};
+static6={cls="static";text="Y：";left=200;top=80;right=232;bottom=104;font=LOGFONT(h=-16);notify=1;transparent=1;z=22};
+static7={cls="static";text="随机间隔：";left=8;top=176;right=96;bottom=200;font=LOGFONT(h=-16);notify=1;transparent=1;z=19};
+static8={cls="static";text="随机区域：";left=200;top=112;right=288;bottom=136;font=LOGFONT(h=-16);notify=1;transparent=1;z=21};
+static9={cls="static";text="ms";left=160;top=176;right=184;bottom=200;font=LOGFONT(h=-16);notify=1;transparent=1;z=4}
+)
+/*}}*/
+
+import console;
+import mouse;
+import key;
+import mouse.screenArea;
+import fsys.config;
+
+winform.mouse_button.items = {"左键", "中键", "右键"};
+winform.mouse_button.selText = "左键";
+winform.click_mode.items = {"单击", "双击"};
+winform.click_mode.selText = "单击";
+winform.shortcut_key.items = {"F7", "F8", "F9", "F10", "F11", "F12"};
+winform.shortcut_key.selText = "F8";
+
+//读取配置文件
+var cfg = fsys.config();
+winform.mouse_button.selText = cfg.config.Sc_mouse_button;
+winform.click_mode.selText = cfg.config.Sc_click_mode;
+if(cfg.config.Sc_click_interval != null) winform.click_interval.text = cfg.config.Sc_click_interval;
+winform.shortcut_key.selText = cfg.config.Sc_shortcut_key;
+winform.random_region.checked = cfg.config.Sc_random_region;
+if(cfg.config.Sc_random_interval != null) winform.random_interval.text = cfg.config.Sc_random_interval;
+if(cfg.config.Sc_random_x1 != null) winform.random_x1.text = cfg.config.Sc_random_x1;
+if(cfg.config.Sc_random_y1 != null) winform.random_y1.text = cfg.config.Sc_random_y1;
+if(cfg.config.Sc_random_x2 != null) winform.random_x2.text = cfg.config.Sc_random_x2;
+if(cfg.config.Sc_random_y2 != null) winform.random_y2.text = cfg.config.Sc_random_y2;
+
+//获取鼠标位置
+thread.invoke(
+	function(mainForm, winform){
+		import mouse;
+		//仅在第一个界面使用，在其他界面时没有销毁线程
+		while(true){
+			if(mainForm.tab.selIndex == 1){
+				var x, y = mouse.getPos();
+				winform.mouse_current_position_x.text = tostring(x);
+				winform.mouse_current_position_y.text = tostring(y);
+				sleep(100);
+			}
+			else{
+				sleep(1000);
+			}
+		}
+	},mainForm, winform
+);
+
+click_flag = false; //是否可以开始点击，全局变量
+var tmId = 0; //定时器ID
+//主体函数
+winform.simple_click = function(){
+	click_flag = !click_flag;
+	
+	if(click_flag){
+    	tmId = winform.setInterval(
+			function(){
+				var button, mode, x, y, w, h;
+				
+				if(winform.mouse_button.text == "左键") button = 0;
+				elseif(winform.mouse_button.text == "中键") button = 1;
+				elseif(winform.mouse_button.text == "右键") button = 2;
+				
+				if(winform.click_mode.text == "单击") mode = 0;
+				elseif(winform.click_mode.text == "双击") mode = 1;
+				
+				x, y = mouse.getPos();
+				
+				if(winform.random_region.checked){
+					x = tonumber(winform.random_x1.text);
+					y = tonumber(winform.random_y1.text);
+					w = tonumber(winform.random_x2.text) - tonumber(winform.random_x1.text);
+					h = tonumber(winform.random_y2.text) - tonumber(winform.random_y1.text);
+					
+					x = x + math.random(0, w);
+					y = y + math.random(0, h);
+				}
+				
+				winform.click(button, mode, x, y);
+				
+				//随机间隔
+				var random_interval_temp = math.random(tonumber(winform.click_interval.text)-tonumber(winform.random_interval.text), tonumber(winform.click_interval.text)+tonumber(winform.random_interval.text));
+				winform.changeInterval(tmId, random_interval_temp);
+				
+				//在运行中突然标志位改变也清除定时器
+				if(!click_flag){
+					winform.clearInterval(tmId);
+					mainForm.is_run_text.text = "未运行";
+    				mainForm.is_run_display.bgcolor = 255;
+    				mainForm.is_run_display.text = '\uF011';
+				}
+			},tonumber(winform.click_interval.text)
+		);
+    }
+    else{
+    	winform.clearInterval(tmId);
+    }
+    
+    //修改是否启动指示
+    if(click_flag){
+    	mainForm.is_run_text.text = "正在运行";
+    	mainForm.is_run_display.bgcolor = 65280;
+    	mainForm.is_run_display.text = '\uF011';
+    }
+    else{
+    	mainForm.is_run_text.text = "未运行";
+    	mainForm.is_run_display.bgcolor = 255;
+    	mainForm.is_run_display.text = '\uF011';
+    }
+    
+    //启动后最小化
+    if(cfg.config.S_minimization && click_flag) win.show(mainForm.hwnd, 6/*_SW_MINIMIZE*/);
+    elseif(cfg.config.S_minimization && !click_flag) win.show(mainForm.hwnd, 9/*_SW_RESTORE*/);
+}
+
+//启动时先注册一次快捷键
+hkId = mainForm.reghotkey(function(id,mod,vk){
+	winform.simple_click();
+}, 0, key.getCode(winform.shortcut_key.text));
+
+//当快捷键改变时重新注册
+winform.shortcut_key.onOk = function(){ 
+	mainForm.unreghotkey(hkId);
+	
+	hkId = mainForm.reghotkey(function(id,mod,vk){
+		winform.simple_click();
+	}, 0, key.getCode(winform.shortcut_key.text));
+}
+
+//随机区域
+winform.random_region.oncommand = function(id,event){
+	if(winform.random_region.checked){
+		var screenArea = mouse.screenArea();
+		screenArea.onSelectionChanged = function(rc){
+			var x, y, width, height = rc.xywh();
+			
+			winform.random_x1.text = x;
+			winform.random_y1.text = y;
+			winform.random_x2.text = x + width;
+			winform.random_y2.text = y + height;
+			
+    		owner.close();
+		}
+		screenArea.doModal();
+	}
+	else{
+		winform.random_x1.text = "";
+		winform.random_y1.text = "";
+		winform.random_x2.text = "";
+		winform.random_y2.text = "";
+	}
+	
+	cfg.config.Sc_random_region = winform.random_region.checked;
+	cfg.config.Sc_random_x1 = winform.random_x1.text;
+	cfg.config.Sc_random_y1 = winform.random_y1.text;
+	cfg.config.Sc_random_x2 = winform.random_x2.text;
+	cfg.config.Sc_random_y2 = winform.random_y2.text;
+}
+
+//随机间隔
+winform.random_interval.oncommand = function(id,event){
+	if(tonumber(winform.random_interval.text)>=tonumber(winform.click_interval.text)){
+		winform.random_interval.text = 0;
+	}
+	
+	cfg.config.Sc_random_interval = winform.random_interval.text;
+}
+
+//鼠标点击基础程序
+//x x坐标 y y坐标
+//button 鼠标按键 0 左 1 中 2 右
+//mode 点击模式 0 单 1 双
+winform.click = function(button, mode, x, y){
+	if(button == 0){
+		if(mode == 0){
+			mouse.click(x, y, true);
+		}
+		elseif(mode == 1){
+			mouse.clickDb(x, y, true);
+		}
+	}
+	elseif(button == 1){
+		if(mode == 0){
+			mouse.mb.click(x, y, true);
+		}
+		elseif(mode == 1){
+			mouse.mb.clickDb(x, y, true);
+		}
+	}
+	elseif(button == 2){
+		if(mode == 0){
+			mouse.rb.click(x, y, true);
+		}
+		elseif(mode == 1){
+			mouse.rb.clickDb(x, y, true);
+		}
+	}
+}
+
+//鼠标按键
+winform.mouse_button.oncommand = function(id,event){
+	cfg.config.Sc_mouse_button = winform.mouse_button.text;
+}
+
+//点击方式
+winform.click_mode.oncommand = function(id,event){
+	cfg.config.Sc_click_mode = winform.click_mode.text;
+}
+
+//点击间隔
+winform.click_interval.oncommand = function(id,event){
+	if(tonumber(winform.click_interval.text)<=0) winform.click_interval.text = "1";
+	
+	if(tonumber(winform.random_interval.text)>=tonumber(winform.click_interval.text)){
+		winform.random_interval.text = 0;
+	}
+	
+	cfg.config.Sc_click_interval = winform.click_interval.text;
+}
+
+//快捷键
+winform.shortcut_key.oncommand = function(id,event){
+	cfg.config.Sc_shortcut_key = winform.shortcut_key.text;
+}
+
+winform.show();
+win.loopMessage();
